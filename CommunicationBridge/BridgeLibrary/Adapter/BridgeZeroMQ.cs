@@ -13,8 +13,7 @@ namespace BridgeLibrary.Adapter
 
         public void Configure(Dictionary<string, string> config)
         {
-            string? address;
-            config.TryGetValue("address", out address);
+            config.TryGetValue("address", out string? address);
             ServerAddress = String.IsNullOrEmpty(address) ? DEF_ADDRESS : address;
 
         }

@@ -14,7 +14,7 @@ namespace BridgeConsole
                 {"address", "tcp://localhost:9001" }
             };
             server.Configure(defaultConfig);
-            Console.WriteLine(String.Format("Starting server listening on `{0}`", defaultConfig["address"]));
+            Console.WriteLine(String.Format("Starting server {0} listening on `{1}`", server.Name, defaultConfig["address"]));
             server.Start();
         }
     }
