@@ -9,6 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BridgeConsole", "BridgeCons
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MQL4", "MQL4", "{BAD29ED8-5B3D-4EB6-956C-3FEA606EF151}"
 	ProjectSection(SolutionItems) = preProject
+		BridgeClient.mq4 = BridgeClient.mq4
 		BridgeClientSimpleTick.mq4 = BridgeClientSimpleTick.mq4
 		README.md = README.md
 		BridgeClientSimple.mq4 = BridgeClientSimple.mq4

@@ -3,7 +3,7 @@ using NetMQ.Sockets;
 
 namespace BridgeLibrary.Adapter
 {
-    public class BridgeZeroMQ : IBridge
+    public class BridgeZeroMQ : Base, IBridge
     {
         private readonly CancellationTokenSource CancellationToken = new();
         const string DEF_ADDRESS = "tcp://127.0.0.1:9001";
@@ -60,6 +60,18 @@ namespace BridgeLibrary.Adapter
 
             }
         }
+
+        protected override void ReceiveCommand(out string command, out string data)
+        {
+            throw new NotImplementedException();
+        }
+
+        protected override void Respond(string response)
+        {
+            throw new NotImplementedException();
+        }
+
+
         #endregion
     }
 }
