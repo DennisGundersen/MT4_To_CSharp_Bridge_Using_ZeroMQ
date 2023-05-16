@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace BridgeLibrary
 {
-    public interface IBridge
+    public interface IBridge: IDisposable
     {
         public string Name { get; }
         public void Configure(Dictionary<string, string> config);

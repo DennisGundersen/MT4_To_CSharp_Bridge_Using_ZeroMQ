@@ -5,8 +5,11 @@ namespace BridgeLibrary.Adapter
 {
     public class BridgeZeroMQ : IBridge
     {
+        private readonly CancellationTokenSource CancellationToken = new();
         const string DEF_ADDRESS = "tcp://127.0.0.1:9001";
-        
+        const string CONNECT_MESSAGE = "HELO";
+        const string CONNECT_MESSAGE_ACK = "EHLO";
+
         #region IBridge
         public string Name => "ZeroMQ Bridge";
 
@@ -23,29 +26,37 @@ namespace BridgeLibrary.Adapter
         {
             using (var runtime = new NetMQRuntime())
             {
-                runtime.Run(ServerAsync());
+                runtime.Run(CancellationToken.Token, ServerAsync(CancellationToken.Token));
             }
-
-            
         }
 
         public void Stop()
         {
-            throw new NotImplementedException();
+            Console.WriteLine("Stopping using cancellation token");
+            CancellationToken.Cancel();
+        }
+
+        public void Dispose()
+        {
+            CancellationToken.Dispose();
         }
         #endregion
 
         #region implementation
-        private async Task ServerAsync()
+        private async Task ServerAsync(CancellationToken token)
         {
-            using (var server = new ResponseSocket())
+            using (var server = new ResponseSocket(ServerAddress))
             {
-                server.Bind(ServerAddress);
-                var (message, more) = await server.ReceiveFrameStringAsync();
-                Console.WriteLine(String.Format("Received message: `{0}` (more: {1})", message, more));
-                string res = "OK żółw";
-                Console.WriteLine("Sending response `{0}`", res);
-                server.SendFrame(res);
+                Console.WriteLine("Waiting for messages...");
+                while (!token.IsCancellationRequested)
+                {
+                    var (message, more) = await server.ReceiveFrameStringAsync(token);
+                    Console.WriteLine(String.Format("Received message: `{0}` (more: {1})", message, more));
+                    string res = (message == CONNECT_MESSAGE) ? CONNECT_MESSAGE_ACK : "OK " + message;
+                    Console.WriteLine("Sending response `{0}`", res);
+                    server.SendFrame(res);
+                }
+
             }
         }
         #endregion
