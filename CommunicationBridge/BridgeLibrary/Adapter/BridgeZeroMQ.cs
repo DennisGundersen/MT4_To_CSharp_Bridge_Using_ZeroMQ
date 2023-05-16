@@ -39,6 +39,7 @@ namespace BridgeLibrary.Adapter
         public void Dispose()
         {
             CancellationToken.Dispose();
+            GC.SuppressFinalize(this);
         }
         #endregion
 

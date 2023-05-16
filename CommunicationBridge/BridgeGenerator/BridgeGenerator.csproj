@@ -8,7 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BridgeLibrary\BridgeLibrary.csproj" />
     <ProjectReference Include="..\Library2Expose\Library2Expose.csproj" />
   </ItemGroup>
 
