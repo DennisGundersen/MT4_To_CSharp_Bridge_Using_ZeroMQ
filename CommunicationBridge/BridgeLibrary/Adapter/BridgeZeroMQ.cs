@@ -6,6 +6,7 @@ namespace BridgeLibrary.Adapter
     public class BridgeZeroMQ : IBridge
     {
         const string DEF_ADDRESS = "tcp://127.0.0.1:9001";
+        
         #region IBridge
         public string Name => "ZeroMQ Bridge";
 
@@ -37,12 +38,13 @@ namespace BridgeLibrary.Adapter
         #region implementation
         private async Task ServerAsync()
         {
-            using (var server = new ResponseSocket(ServerAddress))
+            using (var server = new ResponseSocket())
             {
+                server.Bind(ServerAddress);
                 var (message, more) = await server.ReceiveFrameStringAsync();
                 Console.WriteLine(String.Format("Received message: `{0}` (more: {1})", message, more));
-                string res = "OK";
-                Console.WriteLine("Sending response {0}", res);
+                string res = "OK żółw";
+                Console.WriteLine("Sending response `{0}`", res);
                 server.SendFrame(res);
             }
         }
