@@ -12,12 +12,13 @@
 #include <Zmq/Zmq.mqh>
 
 input string   address="tcp://127.0.0.1:9001";
-input int      connectTimeout=1000; //[ms]
-input int      receiveTimeout=3000; //[ms]
-input int      sendTimeout=4000; //[ms]
-input int      reconnectInterval=2000; //[ms]
-input int      reconnectIntervalMax=30000; //[ms]
+input int      connectTimeout=1000; //connect timeout [ms]
+input int      receiveTimeout=3000; //receive timeout [ms]
+input int      sendTimeout=4000; //send timeout [ms]
+input int      reconnectInterval=2000; //reconnect interval [ms]
+input int      reconnectIntervalMax=30000; //max reconnect interval [ms]
 
+bool useTick = false;
 
 Context context("bridgeClientSimpleTick");
 Socket client(context, ZMQ_REQ);
@@ -52,20 +53,29 @@ bool InitializeConnectionToServer()
    return client.connect(address);
 }
 
-bool SendCommand(string command, string data, ZmqMsg &response)
+bool SendCommand(ZmqMsg& response, string& data[])
 {
-   ZmqMsg cmd(command);
-   ZmqMsg cmdData(data);
-   bool res = client.sendMore(cmd);
-   client.send(cmdData);
+   int dataLen = ArraySize(data) - 1; //number of elements except the last one
+   for(int i = 0; i < dataLen; ++i) //all except last send with more=true
+   {
+      client.sendMore(data[i]);
+   }
+   bool res = client.send(data[dataLen]); //last element send with more=false
    return ReceiveLazyPirate(response);
+}
+
+void ShowResponse(ZmqMsg& msg)
+{
+   PrintFormat("Received Response: size=%d, message=`%s`", msg.size(), msg.getData());
 }
 
 bool Welcome()
 {
    ZmqMsg msg;
    PrintFormat("Sending Connect Message… `%s`", CONNECT_MSG);
-   bool res = SendCommand(CONNECT_MSG, "", msg);
+   string payload[1];
+   payload[0] = CONNECT_MSG;
+   bool res = SendCommand(msg, payload);
    return res && msg.getData() == CONNECT_MSG_ACK;
 }
 
@@ -92,6 +102,24 @@ int OnInit()
    PrintFormat("Using ZeroMQ version: %s", Zmq::getVersion());
    InitializeConnectionToServer();
    connected = Welcome();
+   ZmqMsg msg;
+   
+   string a[1] = {"A"};
+   SendCommand(msg, a);
+   ShowResponse(msg);
+   
+   string af[1] = {"Library2Expose_InstanceExport_PublicMethod1"};
+   SendCommand(msg, af);
+   ShowResponse(msg);
+   
+   string b[2] = {"B", "123"};
+   SendCommand(msg, b);
+   ShowResponse(msg);
+   
+   string bf[2] = {"Library2Expose_InstanceExport_PublicMethod2", "123"};
+   SendCommand(msg, bf);
+   ShowResponse(msg);
+   
    return(INIT_SUCCEEDED);
 }
 
@@ -101,15 +129,18 @@ int OnInit()
 //+------------------------------------------------------------------+
 void OnTick()
 {
+   if(!useTick) return;
    ++tick;
    PrintFormat("OnTick #%d (connected %d)", tick, connected);
 	if(!connected)
 	{
 	   connected = Welcome();
 	}
+	PrintFormat("OnTick #%d: Sending command Tic(%d)", tick, tick); 
+	string payload[2] = {"Tic", ""};
+	payload[1] = IntegerToString(tick);
 	ZmqMsg msg;
-	PrintFormat("OnTick #%d: Sending message `%s`", tick, msg.getData()); 
-	bool res = SendCommand("tic", IntegerToString(tick), msg);
+	bool res = SendCommand(msg, payload);
 	PrintFormat("OnTick #%d: Received succeed=%d, size=%d, message=`%s`", tick, res, msg.size(), msg.getData());
 }
 
