@@ -8,13 +8,16 @@ using System.Threading.Tasks;
 
 namespace BridgeLibrary.Adapter
 {
-    public abstract class Base
+    public abstract class Base : IBridge
     {
-        public delegate string Cmd(string input);
+        public delegate string Cmd(string[] input);
         protected Dictionary<string, Cmd> BaseCommands;
         protected Dictionary<string, Cmd> CustomCommands;
         private string version = "";
-        protected Base()
+
+        public string Name { get; private set; } = "?";
+
+        protected Base(string name)
         {
             version = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version ?? "?";
             BaseCommands = new Dictionary<string, Cmd>()
@@ -24,6 +27,7 @@ namespace BridgeLibrary.Adapter
                 { "Tic", Tac }
             };
             CustomCommands = new Dictionary<string, Cmd>();
+            Name = name;
         }
 
         public void AddCommands(Dictionary<string, Cmd> newCommands)
@@ -35,30 +39,39 @@ namespace BridgeLibrary.Adapter
             }
         }
 
-        public string Execute(string command, string args)
+        public string Execute(Command command)
         {
             Cmd? cmd = null;
-            if (BaseCommands.TryGetValue(command, out cmd))
+            if (BaseCommands.TryGetValue(command.Name, out cmd))
             {
-                Console.WriteLine("Executing Standard Command: {0}({1})", command, args);
-                return cmd.Invoke(args);
+                Console.WriteLine("Executing Standard Command: {0}({1})", command.Name, command.Data);
+                return cmd.Invoke(command.Data);
             }
-            if (CustomCommands.TryGetValue(command, out cmd)) 
+            if (CustomCommands.TryGetValue(command.Name, out cmd))
             {
-                Console.WriteLine("Executing Custom Command: {0}({1})", command, args);
-                return cmd.Invoke(args); 
+                Console.WriteLine("Executing Custom Command: {0}({1})", command.Name, command.Data);
+                return cmd.Invoke(command.Data);
             }
-            Console.WriteLine("Received unknown command {0}({1})", command, args);
+            Console.WriteLine("Received unknown command {0}({1})", command.Name, String.Join(" | ", command.Data));
             return "ERR: Unknown command";
         }
 
-        public string Welcome(string input) => "EHLO";
+        public string Welcome(string[] input) => "EHLO";
 
-        public string Version(string input) => version;
+        public string Version(string[] input) => version;
 
-        public string Tac(string input) => "Tac " + input;
+        public string Tac(string[] input) => "Tac " + input;
 
-        protected abstract void ReceiveCommand(out string command, out string data);
+        protected abstract Task<Command> ReceiveCommand(CancellationToken token);
         protected abstract void Respond(string response);
+
+        public abstract void Configure(Dictionary<string, string> config);
+
+        public abstract void Start();
+
+        public abstract void Stop();
+
+        public abstract void Dispose();
+
     }
 }

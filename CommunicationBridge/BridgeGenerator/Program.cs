@@ -23,7 +23,7 @@ namespace BridgeGenerator
 
                         foreach (MethodInfo method in methods)
                         {
-                            Console.WriteLine(String.Format("\t{0}({1}) : {2}", method.Name, String.Join(", ", method.GetParameters().Select(i => i.ParameterType.ToString()).ToArray()), method.ReturnType.ToString()));
+                            Console.WriteLine(String.Format("\t[{3}] {0}({1}) : {2}", method.Name, String.Join(", ", method.GetParameters().Select(i => i.ParameterType.ToString()).ToArray()), method.ReturnType.ToString(), method.IsStatic ? 'S' : 'I'));
                         }
                     }
                 }
