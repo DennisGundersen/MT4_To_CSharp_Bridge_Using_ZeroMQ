@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using static BridgeLibrary.Adapter.Base;
-
-namespace BridgeConsole
+﻿namespace BridgeConsole
 {
     internal partial class Program
     {
-        private static Dictionary<string, Cmd> GeneratedAvailableCommands()
+        private static Dictionary<string, BridgeLibrary.Adapter.Base.Cmd> GeneratedAvailableCommands()
         {
             return new() {
                 { "Library2Expose_InstanceExport_PublicMethod1", commands.Library2Expose_InstanceExport_PublicMethod1 },
