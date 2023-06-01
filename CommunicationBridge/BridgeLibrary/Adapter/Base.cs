@@ -13,7 +13,7 @@ namespace BridgeLibrary.Adapter
         public delegate string Cmd(string[] input);
         protected Dictionary<string, Cmd> BaseCommands;
         protected Dictionary<string, Cmd> CustomCommands;
-        private string version = "";
+        private readonly string version = "1.0";
 
         public string Name { get; private set; } = "?";
 
